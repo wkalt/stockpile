@@ -127,10 +127,15 @@
 
 (defrecord Stockpile [directory next-likely-id])
 
+(defn sort-fn
+  [p]
+  (entry-id (filename->entry (str (basename p)))))
+
 (defn- reduce-paths
   [f val ^DirectoryStream dirstream]
   (with-open [_ dirstream]
-    (clojure.core/reduce f val (-> dirstream .iterator iterator-seq))))
+    (clojure.core/reduce f val (sort-by sort-fn
+                                        (-> dirstream .iterator iterator-seq)))))
 
 (defn- plausible-prefix?
   [s]
@@ -203,7 +208,7 @@
                                      (max result (-> name
                                                      filename->entry
                                                      entry-id))
-                                     
+
                                      :else
                                      result)))
                                0
